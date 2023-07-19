@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose";
 
 const UserSchema = mongoose.Schema(
     {
@@ -12,11 +12,11 @@ const UserSchema = mongoose.Schema(
         },
         firstname: {
             type: String,
-            required: true,
+            required: false,
         },
         lastname: {
             type: String,
-            required: true,
+            required: false,
         },
         email: {
             type: String,

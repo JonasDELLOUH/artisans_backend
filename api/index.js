@@ -1,9 +1,11 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const mongoose = require("mongoose");
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
 
+//routes
+import AuthRoute from './routes/authRoute.js'
 const app = express();
 
 app.use(bodyParser.json({ limit: "30mb", extended: true}));
@@ -21,3 +23,5 @@ mongoose
   .connect(CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => app.listen(PORT, () => console.log(`Listening at Port ${PORT}`)))
   .catch((error) => console.log(`${error} did not connect`));
+
+app.use('/auth', AuthRoute);
