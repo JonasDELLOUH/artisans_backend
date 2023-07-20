@@ -4,17 +4,22 @@ import dotenv from "dotenv";
 dotenv.config();
 const secret = process.env.JWTKEY;
 
-const authMiddleware = async (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
     try{
-        const token = req.headers.authorization.split(" ")[1];
-        console.log(token);
+        let token = req.header("Authorization");
+        console.log("le token :" + token);
         if (token) {
+            if (token.startsWith("Bearer ")) {
+                token = token.slice(7, token.length).trimStart();
+            }
             const decoded = jwt.verify(token, secret);
             console.log(decoded)
-            req.body._id = decoded?.id;
+            req.body.userId = decoded?.id;
+        }else{
+            return res.status(403).send("Access Denied");
         }
         next();
     } catch (error) {
-        console.log(error);
+        res.status(500).json({ error: error.message });
     }
 }

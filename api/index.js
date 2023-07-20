@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 
 //routes
 import AuthRoute from './routes/authRoute.js'
+import salonRoute from "./routes/salonRoute.js";
 const app = express();
 
 app.use(bodyParser.json({ limit: "30mb", extended: true}));
@@ -21,7 +22,8 @@ const CONNECTION = process.env.MONGODB_CONNECTION;
 
 mongoose
   .connect(CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => app.listen(PORT, () => console.log(`Listening at Port ${PORT}`)))
+  .then(() => app.listen(PORT, '0.0.0.0', () => console.log(`Listening at Port ${PORT}`)))
   .catch((error) => console.log(`${error} did not connect`));
 
 app.use('/auth', AuthRoute);
+app.use("/salon/", salonRoute);
