@@ -5,8 +5,9 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 
 //routes
-import AuthRoute from './routes/authRoute.js'
+import AuthRoute from './routes/authRoute.js';
 import salonRoute from "./routes/salonRoute.js";
+import jobRoute from "./routes/jobRoute.js";
 const app = express();
 
 app.use(bodyParser.json({ limit: "30mb", extended: true}));
@@ -26,4 +27,5 @@ mongoose
   .catch((error) => console.log(`${error} did not connect`));
 
 app.use('/auth', AuthRoute);
-app.use("/salon/", salonRoute);
+app.use("/salon", salonRoute);
+app.use("/job", jobRoute);
