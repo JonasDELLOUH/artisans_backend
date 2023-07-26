@@ -16,6 +16,7 @@ const upload = multer({storage});
 
 export function uploadImage(imageAttribute) {
     return (req, res, next) => {
+        console.log(`req in uploadImage : ${JSON.stringify(req.body)}`)
         try{
             upload.single(imageAttribute)(req, res, (err) => {
                 if (err instanceof multer.MulterError) {

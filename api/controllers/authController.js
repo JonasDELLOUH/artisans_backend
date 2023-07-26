@@ -18,7 +18,7 @@ import jwt from "jsonwebtoken";
         const user = await newUser.save();
         console.log(user)
         const token = jwt.sign({username: user.username, id: user._id}, process.env.JWTKEY,
-            {expiresIn: "1h"})
+            {expiresIn: "10h"})
         res.status(200).json({user, token});
     } catch (error) {
         console.log(error)
@@ -27,8 +27,8 @@ import jwt from "jsonwebtoken";
 };
 
  export const loginUser = async (req, res) => {
+     console.log(`Données reçues : ${JSON.stringify(req.body)}`)
     const {username, password} = req.body;
-
     try {
         const user = await UserModel.findOne({username: username});
 
@@ -39,7 +39,7 @@ import jwt from "jsonwebtoken";
                 res.status(400).json("Wrong password");
             } else {
                 const token = jwt.sign({username: user.username, id: user._id},
-                    process.env.JWTKEY, {expiresIn: "1h"}
+                    process.env.JWTKEY, {expiresIn: "10h"}
                 );
                 res.status(200).json({user, token});
             }

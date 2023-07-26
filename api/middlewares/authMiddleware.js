@@ -6,6 +6,8 @@ const secret = process.env.JWTKEY;
 
 export const verifyToken = async (req, res, next) => {
     try{
+        console.log(`tout : ${JSON.stringify(req.body)}`)
+
         let token = req.header("Authorization");
         // console.log("le token :" + token);
         if (token) {
@@ -13,8 +15,8 @@ export const verifyToken = async (req, res, next) => {
                 token = token.slice(7, token.length).trimStart();
             }
             const decoded = jwt.verify(token, secret);
-            // console.log(decoded)
-            req.body.userId = decoded?.id;
+            req.headers.userId = decoded?.id;
+
         }else{
             return res.status(403).send("Access Denied");
         }
