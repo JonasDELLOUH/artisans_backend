@@ -15,31 +15,24 @@ const storage = multer.diskStorage({
 const upload = multer({storage});
 
 export function uploadImage(imageAttribute) {
-    return (req, res, next) => {
-        console.log(`req in uploadImage : ${JSON.stringify(req.body)}`)
-        try{
+    return (req, res, session) => {
+        return new Promise((resolve, reject) => {
             upload.single(imageAttribute)(req, res, (err) => {
                 if (err instanceof multer.MulterError) {
-                    // Gérer les erreurs Multer
-                    return res.status(400).json({error: 'Une erreur (MulterError) s\'est produite lors du téléchargement de l\'image.'});
+                    reject(new Error("Une erreur (MulterError) s'est produite lors du téléchargement de l'image."));
                 } else if (err) {
-                    console.log(err);
-                    // Gérer d'autres erreurs
-                    return res.status(500).json({error: 'Une erreur s\'est produite lors du traitement de l\'image.'});
+                    reject(new Error("Une erreur s'est produite lors du traitement de l'image."));
                 }
 
                 // Si aucune erreur, ajouter l'URL de l'image dans l'attribut spécifié de la requête
                 if (req.file) {
                     req.body[imageAttribute] = '/files/' + req.file.filename;
                 }
-                next();
+                resolve(); // Résoudre la promesse lorsque tout est bon
             });
-        } catch (error){
-            console.log(error);
-        }
+        });
     };
 }
-
 export function uploadImages(imageAttributes) {
     return (req, res, next) => {
         upload.array(imageAttributes)(req, res, (err) => {

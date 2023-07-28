@@ -1,9 +1,12 @@
 import express from "express";
-import {createSalon} from "../controllers/salonController.js";
+import {createSalon, createSalonWithTransaction} from "../controllers/salonController.js";
 import {verifyToken} from "../middlewares/authMiddleware.js";
-import {uploadImage} from "../controllers/storageController.js";
+import {uploadImage} from "../middlewares/storageMiddleware.js";
 const router = express.Router();
+import multer from "multer";
 
-router.post('/', verifyToken, uploadImage("imageUrl"), createSalon);
+const upload = multer();
+
+router.post('/', createSalonWithTransaction);
 
 export default router;

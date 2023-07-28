@@ -4,24 +4,22 @@ import dotenv from "dotenv";
 dotenv.config();
 const secret = process.env.JWTKEY;
 
-export const verifyToken = async (req, res, next) => {
-    try{
-        console.log(`tout : ${JSON.stringify(req.body)}`)
-
+export const verifyToken = (req, res, session) => {
+    return new Promise((resolve, reject) => {
         let token = req.header("Authorization");
-        // console.log("le token :" + token);
         if (token) {
             if (token.startsWith("Bearer ")) {
                 token = token.slice(7, token.length).trimStart();
             }
-            const decoded = jwt.verify(token, secret);
-            req.headers.userId = decoded?.id;
-
-        }else{
-            return res.status(403).send("Access Denied");
+            try {
+                const decoded = jwt.verify(token, secret);
+                req.headers.userId = decoded?.id;
+                resolve(); // Résoudre la promesse lorsque tout est bon
+            } catch (error) {
+                reject(new Error("Invalid token")); // Rejeter la promesse en cas d'erreur
+            }
+        } else {
+            reject(new Error("Access Denied")); // Rejeter la promesse en cas d'absence de token
         }
-        next();
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}
+    });
+};

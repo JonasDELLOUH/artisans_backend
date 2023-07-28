@@ -1,24 +1,47 @@
 import JobModel from "../models/jobModel.js";
 import * as fs from "fs";
+import {verifyToken} from "../middlewares/authMiddleware.js";
+import mongoose from "mongoose";
+import {uploadImage} from "../middlewares/storageMiddleware.js";
 
 export const createJob = async (req, res) => {
-    console.log(`data send : ${JSON.stringify(req.body)}`)
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        const {jobName, imageUrl} = req.body;
+        // Vérifier le token
+        await verifyToken(req, res, session);
+
+        // Télécharger l'image et ajouter le lien dans req.body.imageUrl
+        await uploadImage("imageUrl")(req, res, session);
+
+        // Continuer avec le reste de la fonction
+        const { jobName, imageUrl } = req.body;
         const userId = req.headers.userId;
-        console.log(`le userId : ${userId}`)
-        const newJob = new JobModel({userId, jobName, imageUrl});
+        console.log(`le userId : ${userId}`);
+        const newJob = new JobModel({ userId, jobName, imageUrl });
         const job = await newJob.save();
-        res.status(200).json({job});
+        res.status(200).json({ job });
+
+        // Valider la transaction
+        await session.commitTransaction();
     } catch (error) {
-        res.status(500).json({message: error.message});
+        // Annuler la transaction en cas d'erreur
+        await session.abortTransaction();
+        res.status(500).json({ message: error.message });
+    } finally {
+        // Terminer la session
+        await session.endSession();
     }
-}
-
+};
 export const getAllJobs = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        const {limit, skip} = req.query;
+        // Vérifier le token
+        await verifyToken(req, res, session);
 
+        // Continuer avec le reste de la fonction
+        const { limit, skip } = req.query;
         const limitNumber = parseInt(limit, 10);
         const skipNumber = parseInt(skip, 10);
 
@@ -30,10 +53,18 @@ export const getAllJobs = async (req, res) => {
             __v: job.__v,
         }));
         res.status(200).json(jobsWithoutUserId);
+
+        // Valider la transaction
+        await session.commitTransaction();
     } catch (error) {
-        res.status(500).json({message: error.message});
+        // Annuler la transaction en cas d'erreur
+        await session.abortTransaction();
+        res.status(500).json({ message: error.message });
+    } finally {
+        // Terminer la session
+        await session.endSession();
     }
-}
+};
 
 export async function updateJob(req, res) {
     try {
@@ -62,4 +93,8 @@ export async function updateJob(req, res) {
     } catch (error) {
         res.status(500).json({error: error.message});
     }
+}
+
+export async function searchJob(req, res){
+
 }

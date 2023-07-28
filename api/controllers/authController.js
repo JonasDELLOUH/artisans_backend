@@ -47,7 +47,7 @@ import jwt from "jsonwebtoken";
             res.status(404).json("User not found");
         }
 
-    } catch (err) {
-        res.status(500).json(err);
+    } catch (error) {
+        res.status(500).json({error: error.message});
     }
 };
