@@ -12,15 +12,15 @@ const UserSchema = mongoose.Schema(
         },
         firstname: {
             type: String,
-            required: false,
         },
         lastname: {
             type: String,
-            required: false,
         },
         email: {
             type: String,
-            required: false
+        },
+        phone: {
+            type: String,
         },
         hasSalon: {
             type: Boolean,

@@ -6,8 +6,12 @@ import jwt from "jsonwebtoken";
     const hashedPass = await bcrypt.hash(req.body.password, salt);
     req.body.password = hashedPass;
 
-    const newUser = new UserModel(req.body);
-    const {username} = req.body
+    const {username, password, email, phone} = req.body;
+
+    const newUser = new UserModel({
+        username, password, email, phone 
+    });
+
 
     try {
         const oldUser = await UserModel.findOne({username});
@@ -27,14 +31,13 @@ import jwt from "jsonwebtoken";
 };
 
  export const loginUser = async (req, res) => {
-     console.log(`Données reçues : ${JSON.stringify(req.body)}`)
     const {username, password} = req.body;
+    console.log(`username : ${username} password: ${password}`)
     try {
         const user = await UserModel.findOne({username: username});
-
         if (user) {
             const validity = await bcrypt.compare(password, user.password);
-
+            console.log(`validity : ${validity}`)
             if (!validity) {
                 res.status(400).json("Wrong password");
             } else {
