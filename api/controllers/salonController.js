@@ -37,3 +37,44 @@ export const getAllSalon = async(req, res) => {
         res.status(409).json({ message: error.message });
     }
 }
+
+export const getNearestSalon = async (req, res) => {
+    try {
+        const { lat, long, limit = 10, skip = 0 } = req.body;
+    
+        const limitNumber = parseInt(limit, 10);
+        const skipNumber = parseInt(skip, 10);
+    
+        const salons = await SalonModel.aggregate([
+            {
+                $project: {
+                    userId: 1,
+                    jobId: 1,
+                    name: 1,
+                    lat: 1,
+                    long: 1,
+                    imageUrl: 1,
+                    address: 1,
+                    nbrStar: 1,
+                    totalStar: 1,
+                    email: 1,
+                    phone: 1,
+                    distance: {
+                        $add: [
+                            { $pow: [{ $subtract: ['$lat', lat] }, 2] },
+                            { $pow: [{ $subtract: ['$long', long] }, 2] },
+                        ]
+                        ,
+                    },
+                },
+            },
+            { $sort: { distance: 1 } },
+            { $limit: limitNumber },
+            { $skip: skipNumber },
+        ]);
+    
+        res.status(200).json(salons);
+    } catch (error) {
+        res.status(409).json({ message: error.message });
+    }    
+};
