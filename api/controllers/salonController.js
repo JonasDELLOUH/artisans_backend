@@ -21,3 +21,19 @@ export const createSalon = async (req, res) => {
         res.status(409).json({ message: error.message });
     }
 }
+
+
+export const getAllSalon = async(req, res) => {
+    try{
+        const {limit, skip} = req.query;
+
+        const limitNumber = parseInt(limit, 10);
+        const skipNumber = parseInt(skip, 10);
+
+        const salons = await SalonModel.find().limit(limitNumber).skip(skipNumber);
+        res.status(200).json(salons);
+
+    } catch (error){
+        res.status(409).json({ message: error.message });
+    }
+}
