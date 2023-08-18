@@ -12,6 +12,7 @@ const salonSchema = mongoose.Schema({
         totalStar: {type: Number},
         email: {type: String},
         phone: {type: String},
+        likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     },
     {timestamps: true}
 );
