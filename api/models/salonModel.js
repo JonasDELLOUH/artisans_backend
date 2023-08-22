@@ -4,6 +4,7 @@ const salonSchema = mongoose.Schema({
         userId: mongoose.Schema.Types.ObjectId,
         jobId: {type: String, required: true},
         name: {type: String, required: true},
+        desc: {type: String},
         lat: {type: Number},
         long: {type: Number},
         imageUrl: {type: String},

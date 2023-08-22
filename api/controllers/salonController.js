@@ -4,7 +4,7 @@ import JobModel from "../models/jobModel.js";
 export const createSalon = async (req, res) => {
     try {
         const userId = req.headers.userId;
-        const {jobId, name, lat, long, imageUrl, address, email, phone} = req.body;
+        const {jobId, name, lat, long, imageUrl, address, email, phone, desc} = req.body;
         const totalStar = 25;
 
         const job = await JobModel.findById(jobId);
@@ -12,7 +12,7 @@ export const createSalon = async (req, res) => {
             return res.status(404).json({ message: "ID du job invalide." });
         }
 
-        const newSalon = new SalonModel({userId, jobId, name, lat, long, imageUrl, address, email, phone, totalStar});
+        const newSalon = new SalonModel({userId, jobId, name, lat, long, imageUrl, address, email, phone, totalStar, desc});
         const salon = await newSalon.save();
         return res.status(200).json({salon});
 
