@@ -1,10 +1,10 @@
 import SalonModel from "../models/salonModel.js";
-import PostModel from "../models/postModel.js";
+import StoryModel from "../models/storyModel.js";
 
 
-export const createPost = async (req, res) => {
+export const createStory = async (req, res) => {
     try {
-        const { salonId, imageUrl, content } = req.body;
+        const { salonId, videoUrl, content } = req.body;
         const userId = req.headers.userId; // Récupère l'ID de l'utilisateur depuis le header
 
         const salon = await SalonModel.findById(salonId);
@@ -17,27 +17,26 @@ export const createPost = async (req, res) => {
             return res.status(403).json({ message: "Accès non autorisé au salon." });
         }
 
-        // Vérifie si au moins l'une des données (imageUrl ou content) est présente
-        if (!imageUrl && !content) {
-            return res.status(400).json({ message: "L'image ou le contenu du post est requis." });
+        // Vérifie si au moins l'une des données (videoUrl ou content) est présente
+        if (!videoUrl && !content) {
+            return res.status(400).json({ message: "La vidéo ou le contenu du post est requis." });
         }
 
-        const newPost = new PostModel({
+        const newStory = new StoryModel({
             salonId,
-            imageUrl,
+            videoUrl,
             content,
         });
 
-        const post = await newPost.save();
-        res.status(201).json(post);
+        const story = await newStory.save();
+        res.status(201).json(story);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
 
-
-export const getPosts = async (req, res) => {
+export const getStories = async (req, res) => {
     try {
         const { lat, long, limit = 10, skip = 0 } = req.query;
 
@@ -53,14 +52,11 @@ export const getPosts = async (req, res) => {
                     as: "salon"
                 },
             },
-            //{
-            //    $unwind: "$salon",
-            //},
             {
                 $project: {
                     _id: 1,
                     salonId: 1,
-                    imageUrl: 1,
+                    videoUrl: 1,
                     content: 1,
                     createdAt: 1,
                     updatedAt: 1,
@@ -83,11 +79,11 @@ export const getPosts = async (req, res) => {
             { $limit: limitNumber },
         ];        
 
-        const posts = await PostModel.aggregate(aggregationPipeline);
-        const count = posts.length;
+        const stories = await StoryModel.aggregate(aggregationPipeline);
+        const count = stories.length;
 
         res.status(200).json({
-            posts,
+            stories,
             limit: limitNumber,
             skip: skipNumber,
             count,

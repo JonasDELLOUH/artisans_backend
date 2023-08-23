@@ -6,7 +6,7 @@ const PostSchema = mongoose.Schema({
     content: {type: String},
 },
 {timestamps: true}
-)
+);
 
 const PostModel = mongoose.model("Posts", PostSchema);
 export default PostModel;

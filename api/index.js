@@ -9,6 +9,7 @@ import helmet from "helmet";
 import AuthRoute from './routes/authRoute.js';
 import salonRoute from "./routes/salonRoute.js";
 import jobRoute from "./routes/jobRoute.js";
+import postRoute from "./routes/postRoute.js";
 
 const app = express();
 
@@ -35,3 +36,4 @@ mongoose
 app.use('/auth', AuthRoute);
 app.use("/salon", salonRoute);
 app.use("/job", jobRoute);
+app.use("/post", postRoute)

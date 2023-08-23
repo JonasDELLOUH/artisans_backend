@@ -35,10 +35,37 @@ export function uploadImage(imageAttribute) {
                 next();
             });
         } catch (error){
-            console.log(error);
+            return res.status(500).json({ error: 'Une erreur s\'est produite lors du traitement de l\'image.' });
         }
     };
 }
+
+export function uploadMedia(mediaAttribute) {
+    return (req, res, next) => {
+        console.log(`req in uploadVideo : ${JSON.stringify(req.body)}`)
+        try {
+            upload.single(mediaAttribute)(req, res, (err) => {
+                if (err instanceof multer.MulterError) {
+                    // Gérer les erreurs Multer
+                    return res.status(400).json({ error: 'Une erreur (MulterError) s\'est produite lors du téléchargement du média.' });
+                } else if (err) {
+                    console.log(err);
+                    return res.status(500).json({ error: 'Une erreur s\'est produite lors du traitement du média.' });
+                }
+
+                // Si aucune erreur, ajouter l'URL du média dans l'attribut spécifié de la requête
+                if (req.file) {
+                    req.body[mediaAttribute] = '/files/' + req.file.filename;
+                }
+                next();
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({ error: 'Une erreur s\'est produite lors du traitement du média.' });
+        }
+    };
+}
+
 
 export function uploadImages(imageAttributes) {
     return (req, res, next) => {
