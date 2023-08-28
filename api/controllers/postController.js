@@ -1,5 +1,6 @@
 import SalonModel from "../models/salonModel.js";
 import PostModel from "../models/postModel.js";
+import mongoose from "mongoose";
 
 
 export const createPost = async (req, res) => {
@@ -39,23 +40,20 @@ export const createPost = async (req, res) => {
 
 export const getPosts = async (req, res) => {
     try {
-        const { lat, long, limit = 10, skip = 0 } = req.query;
+        const { lat, long, limit = 10, skip = 0, salonId } = req.query;
 
         const limitNumber = parseInt(limit, 10);
         const skipNumber = parseInt(skip, 10);
 
-        const aggregationPipeline = [
+        let aggregationPipeline = [
             {
                 $lookup: {
                     from: "Salons",
                     localField: "salonId",
                     foreignField: "_id",
-                    as: "salon"
+                    as: "salon",
                 },
             },
-            //{
-            //    $unwind: "$salon",
-            //},
             {
                 $project: {
                     _id: 1,
@@ -81,19 +79,42 @@ export const getPosts = async (req, res) => {
             { $sort: { distance: 1 } },
             { $skip: skipNumber },
             { $limit: limitNumber },
-        ];        
-
+        ];
+        
+        if (salonId) {
+            console.log("yess")
+            aggregationPipeline = [
+                ...aggregationPipeline,
+                {
+                    $match: {
+                        "salonId": salonId
+                    }
+                }
+            ];
+        }
+        
         const posts = await PostModel.aggregate(aggregationPipeline);
-        const count = posts.length;
-
+        
+        // Parcourir les posts et ajouter les champs du salon
+        for (const post of posts) {
+            const salon = await SalonModel.findById(post.salonId);
+            post.salon = {
+                _id: salon._id,
+                name: salon.name,
+                imageUrl: salon.imageUrl,
+            };
+        }
+        
         res.status(200).json({
             posts,
             limit: limitNumber,
             skip: skipNumber,
-            count,
+            //count: posts.length,
         });
+        
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
 

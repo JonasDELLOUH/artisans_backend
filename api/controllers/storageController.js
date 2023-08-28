@@ -1,5 +1,6 @@
 import multer from "multer";
 import path from "path";
+import mime from "mime-types";
 // Configuration de Multer pour enregistrer les images dans le dossier 'public/files'
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -40,17 +41,27 @@ export function uploadImage(imageAttribute) {
     };
 }
 
-export function uploadMedia(mediaAttribute) {
+export function uploadVideo(mediaAttribute) {
     return (req, res, next) => {
         console.log(`req in uploadVideo : ${JSON.stringify(req.body)}`)
         try {
-            upload.single(mediaAttribute)(req, res, (err) => {
+            upload.single(mediaAttribute)(req, res, async (err) => {
                 if (err instanceof multer.MulterError) {
                     // Gérer les erreurs Multer
                     return res.status(400).json({ error: 'Une erreur (MulterError) s\'est produite lors du téléchargement du média.' });
                 } else if (err) {
                     console.log(err);
                     return res.status(500).json({ error: 'Une erreur s\'est produite lors du traitement du média.' });
+                }
+
+                // Vérifier si le fichier téléchargé est une vidéo
+                if (!req.file) {
+                    return res.status(400).json({ error: 'Aucun fichier n\'a été téléchargé.' });
+                }
+
+                const mimeType = mime.lookup(req.file.originalname);
+                if (!mimeType.startsWith('video/')) {
+                    return res.status(400).json({ error: 'Le fichier téléchargé doit être une vidéo.' });
                 }
 
                 // Si aucune erreur, ajouter l'URL du média dans l'attribut spécifié de la requête
@@ -63,32 +74,5 @@ export function uploadMedia(mediaAttribute) {
             console.log(error);
             return res.status(500).json({ error: 'Une erreur s\'est produite lors du traitement du média.' });
         }
-    };
-}
-
-
-export function uploadImages(imageAttributes) {
-    return (req, res, next) => {
-        upload.array(imageAttributes)(req, res, (err) => {
-            if (err instanceof multer.MulterError) {
-                // Gérer les erreurs Multer
-                return res.status(400).json({error: 'Une erreur s\'est produite lors du téléchargement des images.'});
-            } else if (err) {
-                // Gérer d'autres erreurs
-                return res.status(500).json({error: 'Une erreur s\'est produite lors du traitement des images.'});
-            }
-
-            // Si aucune erreur, ajouter les URLs des images dans les attributs spécifiés de la requête
-            if (req.files) {
-                req.body = {...req.body}; // Clonez req.body pour éviter de modifier l'objet d'origine
-
-                imageAttributes.forEach((attribute, index) => {
-                    if (req.files[index]) {
-                        req.body[attribute] = '/files/' + req.files[index].filename;
-                    }
-                });
-            }
-            next();
-        });
     };
 }

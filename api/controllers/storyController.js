@@ -18,8 +18,8 @@ export const createStory = async (req, res) => {
         }
 
         // Vérifie si au moins l'une des données (videoUrl ou content) est présente
-        if (!videoUrl && !content) {
-            return res.status(400).json({ message: "La vidéo ou le contenu du post est requis." });
+        if (!videoUrl) {
+            return res.status(400).json({ message: "La vidéo de la story est requise." });
         }
 
         const newStory = new StoryModel({
@@ -38,12 +38,12 @@ export const createStory = async (req, res) => {
 
 export const getStories = async (req, res) => {
     try {
-        const { lat, long, limit = 10, skip = 0 } = req.query;
+        const { lat, long, limit = 10, skip = 0, salonId } = req.query;
 
         const limitNumber = parseInt(limit, 10);
         const skipNumber = parseInt(skip, 10);
 
-        const aggregationPipeline = [
+        let aggregationPipeline = [
             {
                 $lookup: {
                     from: "Salons",
@@ -77,7 +77,18 @@ export const getStories = async (req, res) => {
             { $sort: { distance: 1 } },
             { $skip: skipNumber },
             { $limit: limitNumber },
-        ];        
+        ];
+        
+        if (salonId) {
+            aggregationPipeline = [
+                ...aggregationPipeline,
+                {
+                    $match: {
+                        "salonId": salonId
+                    }
+                }
+            ];
+        }
 
         const stories = await StoryModel.aggregate(aggregationPipeline);
         const count = stories.length;
