@@ -67,20 +67,21 @@ export const getPosts = async (req, res) => {
                             if: { $and: [lat, long] },
                             then: {
                                 $add: [
-                                    { $pow: [{ $subtract: ["$salon.lat", parseFloat(lat)] }, 2] },
-                                    { $pow: [{ $subtract: ["$salon.long", parseFloat(long)] }, 2] },
+                                    { $pow: [{ $subtract: [{ $arrayElemAt: ["$salon.lat", 0] }, parseFloat(lat)] }, 2] },
+                                    { $pow: [{ $subtract: [{ $arrayElemAt: ["$salon.long", 0] }, parseFloat(long)] }, 2] },
                                 ],
                             },
                             else: null,
                         },
                     },
                 },
+
             },
             { $sort: { distance: 1 } },
             { $skip: skipNumber },
             { $limit: limitNumber },
         ];
-        
+
         if (salonId) {
             console.log("yess")
             aggregationPipeline = [
@@ -92,9 +93,9 @@ export const getPosts = async (req, res) => {
                 }
             ];
         }
-        
+
         const posts = await PostModel.aggregate(aggregationPipeline);
-        
+
         // Parcourir les posts et ajouter les champs du salon
         for (const post of posts) {
             const salon = await SalonModel.findById(post.salonId);
@@ -104,14 +105,14 @@ export const getPosts = async (req, res) => {
                 imageUrl: salon.imageUrl,
             };
         }
-        
+
         res.status(200).json({
             posts,
             limit: limitNumber,
             skip: skipNumber,
             //count: posts.length,
         });
-        
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

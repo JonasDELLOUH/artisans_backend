@@ -65,8 +65,8 @@ export const getStories = async (req, res) => {
                             if: { $and: [lat, long] },
                             then: {
                                 $add: [
-                                    { $pow: [{ $subtract: ["$salon.lat", parseFloat(lat)] }, 2] },
-                                    { $pow: [{ $subtract: ["$salon.long", parseFloat(long)] }, 2] },
+                                    { $pow: [{ $subtract: [{ $arrayElemAt: ["$salon.lat", 0] }, parseFloat(lat)] }, 2] },
+                                    { $pow: [{ $subtract: [{ $arrayElemAt: ["$salon.long", 0] }, parseFloat(long)] }, 2] },
                                 ],
                             },
                             else: null,
@@ -92,6 +92,16 @@ export const getStories = async (req, res) => {
 
         const stories = await StoryModel.aggregate(aggregationPipeline);
         const count = stories.length;
+
+        // Parcourir les stories et ajouter les champs du salon
+        for (const story of stories) {
+            const salon = await SalonModel.findById(story.salonId);
+            story.salon = {
+                _id: salon._id,
+                name: salon.name,
+                imageUrl: salon.imageUrl,
+            };
+        }
 
         res.status(200).json({
             stories,
