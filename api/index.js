@@ -25,6 +25,7 @@ app.use(helmet());
 app.use(express.static('public'));
 app.use('/files', express.static('public/files'));
 
+
 dotenv.config();
 const PORT = process.env.PORT;
 const CONNECTION = process.env.MONGODB_CONNECTION;
@@ -39,3 +40,4 @@ app.use("/salon", salonRoute);
 app.use("/job", jobRoute);
 app.use("/post", postRoute);
 app.use("/story", storyRoute);
+

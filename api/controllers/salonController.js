@@ -4,22 +4,40 @@ import JobModel from "../models/jobModel.js";
 export const createSalon = async (req, res) => {
     try {
         const userId = req.headers.userId;
-        const {jobId, name, lat, long, imageUrl, address, email, phone, desc} = req.body;
+        const { jobId, name, lat, long, imageUrl, address, email, phone, desc } = req.body;
         const totalStar = 25;
+
+        // Vérifier si l'utilisateur a déjà un salon
+        const existingSalon = await SalonModel.findOne({ userId });
+        if (existingSalon) {
+            return res.status(409).json({ message: "Vous avez déjà un salon enregistré." });
+        }
 
         const job = await JobModel.findById(jobId);
         if (!job) {
             return res.status(404).json({ message: "ID du job invalide." });
         }
 
-        const newSalon = new SalonModel({userId, jobId, name, lat, long, imageUrl, address, email, phone, totalStar, desc});
-        const salon = await newSalon.save();
-        return res.status(200).json({salon});
+        const newSalon = new SalonModel({
+            userId,
+            jobId,
+            name,
+            lat,
+            long,
+            imageUrl,
+            address,
+            email,
+            phone,
+            totalStar,
+            desc
+        });
 
-    } catch (error){
+        const salon = await newSalon.save();
+        return res.status(200).json({ salon });
+    } catch (error) {
         res.status(409).json({ message: error.message });
     }
-}
+};
 
 
 export const updateSalon = async (req, res) => {
@@ -174,3 +192,20 @@ export const likeSalon = async (req, res) => {
     }
 }
 
+export const getUserSalon = async (req, res) => {
+    const userId = req.headers.userId; // Récupérer l'ID de l'utilisateur à partir du jeton vérifié
+    
+    try {
+        const salon = await SalonModel.findOne({ userId }); // Rechercher le salon correspondant à l'ID de l'utilisateur
+
+        if (salon) {
+            // Si un salon est trouvé, renvoyer un objet avec un booléen true et les informations du salon
+            return res.status(200).json({ hasSalon: true, salon });
+        } else {
+            // Si aucun salon n'est trouvé, renvoyer un objet avec un booléen false
+            return res.status(200).json({ hasSalon: false });
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
