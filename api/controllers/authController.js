@@ -23,7 +23,7 @@ import jwt from "jsonwebtoken";
         console.log(user)
         const token = jwt.sign({username: user.username, id: user._id}, process.env.JWTKEY,
             {expiresIn: "10h"})
-        res.status(200).json({user, token});
+        res.status(201).json({user, token});
     } catch (error) {
         console.log(error)
         res.status(500).json({message: error.message});
