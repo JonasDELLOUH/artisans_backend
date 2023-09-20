@@ -102,6 +102,7 @@ export const getAllSalon = async (req, res) => {
                     jobId: 1,
                     name: 1,
                     lat: 1,
+                    desc: 1,
                     long: 1,
                     imageUrl: 1,
                     address: 1,
