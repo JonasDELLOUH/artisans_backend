@@ -51,7 +51,7 @@ export const createSalon = async (req, res) => {
 export const updateSalon = async (req, res) => {
     try {
         const salonId = req.params.id;
-        const { jobId, name, lat, long, imageUrl, address, email, phone } = req.body;
+        const { jobId, name, lat, long, imageUrl, address, email, phone, desc } = req.body;
         const userId = req.headers.userId;
 
         const salon = await SalonModel.findById(salonId);
@@ -60,7 +60,8 @@ export const updateSalon = async (req, res) => {
             return res.status(404).json({ message: "Salon non trouvé." });
         }
 
-        if (userId !== salon.userId) {
+
+        if (userId != salon.userId) {
             return res.status(403).json({ message: "Vous n'avez pas la permission de modifier ce salon." });
         }
 
@@ -71,6 +72,7 @@ export const updateSalon = async (req, res) => {
                 name,
                 lat,
                 long,
+                desc,
                 imageUrl,
                 address,
                 email,
