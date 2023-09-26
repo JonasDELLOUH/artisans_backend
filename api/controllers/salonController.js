@@ -33,6 +33,14 @@ export const createSalon = async (req, res) => {
         });
 
         const salon = await newSalon.save();
+
+        // Mettre à jour hasSalon de l'utilisateur
+        const user = await UserModel.findOne({ _id: userId });
+        if (user) {
+            user.hasSalon = true;
+            await user.save();
+        }
+
         return res.status(200).json({ salon });
     } catch (error) {
         res.status(409).json({ message: error.message });
@@ -44,6 +52,17 @@ export const updateSalon = async (req, res) => {
     try {
         const salonId = req.params.id;
         const { jobId, name, lat, long, imageUrl, address, email, phone } = req.body;
+        const userId = req.headers.userId;
+
+        const salon = await SalonModel.findById(salonId);
+
+        if (!salon) {
+            return res.status(404).json({ message: "Salon non trouvé." });
+        }
+
+        if (userId !== salon.userId) {
+            return res.status(403).json({ message: "Vous n'avez pas la permission de modifier ce salon." });
+        }
 
         const updatedSalon = await SalonModel.findByIdAndUpdate(
             salonId,
@@ -60,10 +79,6 @@ export const updateSalon = async (req, res) => {
             { new: true }
         );
 
-        if (!updatedSalon) {
-            return res.status(404).json({ message: "Salon non trouvé." });
-        }
-
         return res.status(200).json({ updatedSalon });
 
     } catch (error) {
@@ -72,10 +87,11 @@ export const updateSalon = async (req, res) => {
 };
 
 
+
 export const getAllSalon = async (req, res) => {
     try {
         const { lat, long, limit = 10, skip = 0, jobId, name } = req.body;
-    
+
         const limitNumber = parseInt(limit, 10);
         const skipNumber = parseInt(skip, 10);
 
@@ -141,7 +157,7 @@ export const getAllSalon = async (req, res) => {
         ]);
 
         const allSalons = await SalonModel.find();
-        
+
         const totalStarsSum = allSalons.reduce((sum, salon) => sum + salon.totalStar, 0);
         const totalSalons = allSalons.length;
         const averageTotalStars = totalStarsSum / totalSalons;
@@ -151,7 +167,7 @@ export const getAllSalon = async (req, res) => {
         }
 
         const count = await SalonModel.countDocuments(query);
-    
+
         res.status(200).json({
             count,
             skip: skipNumber,
@@ -160,7 +176,7 @@ export const getAllSalon = async (req, res) => {
         });
     } catch (error) {
         res.status(409).json({ message: error.message });
-    }    
+    }
 };
 
 export const likeSalon = async (req, res) => {
@@ -186,7 +202,7 @@ export const likeSalon = async (req, res) => {
         }
 
         await salon.save();
-        
+
         res.status(200).json({ message: "Opération de like/dislike réussie." });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -195,7 +211,7 @@ export const likeSalon = async (req, res) => {
 
 export const getUserSalon = async (req, res) => {
     const userId = req.headers.userId; // Récupérer l'ID de l'utilisateur à partir du jeton vérifié
-    
+
     try {
         const salon = await SalonModel.findOne({ userId }); // Rechercher le salon correspondant à l'ID de l'utilisateur
 

@@ -14,6 +14,7 @@ import salonRoute from "./routes/salonRoute.js";
 import jobRoute from "./routes/jobRoute.js";
 import postRoute from "./routes/postRoute.js";
 import storyRoute from "./routes/storyRoute.js"; 
+import userRoute from "./routes/userRoute.js";
 
 const app = express();
 
@@ -96,3 +97,4 @@ app.use("/salon", salonRoute);
 app.use("/job", jobRoute);
 app.use("/post", postRoute);
 app.use("/story", storyRoute);
+app.use("/user",userRoute );

@@ -42,7 +42,7 @@ import jwt from "jsonwebtoken";
                 res.status(400).json("Wrong password");
             } else {
                 const token = jwt.sign({username: user.username, id: user._id},
-                    process.env.JWTKEY, {expiresIn: "10h"}
+                    process.env.JWTKEY, {expiresIn: "5d"}
                 );
                 res.status(200).json({user, token});
             }
@@ -54,3 +54,4 @@ import jwt from "jsonwebtoken";
         res.status(500).json(err);
     }
 };
+
