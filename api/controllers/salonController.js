@@ -13,6 +13,10 @@ export const createSalon = async (req, res) => {
             return res.status(409).json({ message: "Vous avez déjà un salon enregistré." });
         }
 
+        const oldSalon = await SalonModel.findOne({name});
+
+        if (oldSalon) return res.status(400).json({message: "Il existe déjà un salon du même nom"});
+
         const job = await JobModel.findById(jobId);
         if (!job) {
             return res.status(404).json({ message: "ID du job invalide." });
@@ -60,6 +64,9 @@ export const updateSalon = async (req, res) => {
             return res.status(404).json({ message: "Salon non trouvé." });
         }
 
+        const oldSalon = await SalonModel.findOne({name});
+
+        if (oldSalon) return res.status(400).json({message: "Il existe déjà un salon du même nom"});
 
         if (userId != salon.userId) {
             return res.status(403).json({ message: "Vous n'avez pas la permission de modifier ce salon." });
