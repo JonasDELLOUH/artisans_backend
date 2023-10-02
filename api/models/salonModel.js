@@ -9,10 +9,11 @@ const salonSchema = mongoose.Schema({
         long: {type: Number},
         imageUrl: {type: String},
         address: {type: String},
-        nbrStar: {type: Number},
+        nbrStar: {type: Number, default: 0},
         totalStar: {type: Number},
         email: {type: String},
         phone: {type: String},
+        whatsappNumber: {type: String},
         likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     },
     {timestamps: true}

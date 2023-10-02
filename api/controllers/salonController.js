@@ -4,7 +4,7 @@ import JobModel from "../models/jobModel.js";
 export const createSalon = async (req, res) => {
     try {
         const userId = req.headers.userId;
-        const { jobId, name, lat, long, imageUrl, address, email, phone, desc } = req.body;
+        const { jobId, name, lat, long, imageUrl, address, email, phone, desc, whatsappNumber } = req.body;
         const totalStar = 25;
 
         // Vérifier si l'utilisateur a déjà un salon
@@ -13,9 +13,9 @@ export const createSalon = async (req, res) => {
             return res.status(409).json({ message: "Vous avez déjà un salon enregistré." });
         }
 
-        const oldSalon = await SalonModel.findOne({name});
+        const oldSalon = await SalonModel.findOne({ name });
 
-        if (oldSalon) return res.status(400).json({message: "Il existe déjà un salon du même nom"});
+        if (oldSalon) return res.status(400).json({ message: "Il existe déjà un salon du même nom" });
 
         const job = await JobModel.findById(jobId);
         if (!job) {
@@ -32,6 +32,7 @@ export const createSalon = async (req, res) => {
             address,
             email,
             phone,
+            whatsappNumber,
             totalStar,
             desc
         });
@@ -55,7 +56,7 @@ export const createSalon = async (req, res) => {
 export const updateSalon = async (req, res) => {
     try {
         const salonId = req.params.id;
-        const { jobId, name, lat, long, imageUrl, address, email, phone, desc } = req.body;
+        const { jobId, name, lat, long, imageUrl, address, email, phone, whatsappNumber, desc } = req.body;
         const userId = req.headers.userId;
 
         const salon = await SalonModel.findById(salonId);
@@ -64,9 +65,15 @@ export const updateSalon = async (req, res) => {
             return res.status(404).json({ message: "Salon non trouvé." });
         }
 
-        const oldSalon = await SalonModel.findOne({name});
+        // Vérifiez si un autre salon avec le même nom existe, à l'exception du salon actuel
+        const existingSalon = await SalonModel.findOne({
+            name,
+            _id: { $ne: salon._id } // Exclut le salon actuel
+        });
 
-        if (oldSalon) return res.status(400).json({message: "Il existe déjà un salon du même nom"});
+        if (existingSalon) {
+            return res.status(400).json({ message: "Il existe déjà un salon avec le même nom." });
+        }
 
         if (userId != salon.userId) {
             return res.status(403).json({ message: "Vous n'avez pas la permission de modifier ce salon." });
@@ -84,6 +91,7 @@ export const updateSalon = async (req, res) => {
                 address,
                 email,
                 phone,
+                whatsappNumber
             },
             { new: true }
         );
@@ -188,6 +196,31 @@ export const getAllSalon = async (req, res) => {
     }
 };
 
+export const verifyLikeStatus = async (req, res) => {
+    try {
+        const userId = req.headers.userId;
+        const salonId = req.params.id;
+
+        const salon = await SalonModel.findById(salonId);
+        if (!salon) {
+            return res.status(404).json({ message: "Salon non trouvé." });
+        }
+
+        const userLiked = salon.likedBy.includes(userId);
+        console.log(userLiked);
+
+        if (userLiked) {
+            res.status(200).json({ isLiked: true });
+        } else {
+
+            res.status(200).json({ isLiked: false });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
 export const likeSalon = async (req, res) => {
     try {
         const userId = req.headers.userId;
@@ -199,20 +232,24 @@ export const likeSalon = async (req, res) => {
         }
 
         const userLiked = salon.likedBy.includes(userId);
+        console.log(userLiked);
 
         if (userLiked) {
             // Utilisateur a déjà liké, donc disliké
-            salon.nbrStar -= 1;
+            salon.totalStar -= 1;
             salon.likedBy.pull(userId);
+
+            await salon.save();
+            res.status(200).json({ message: "dislike réussie.", isLiked: false });
         } else {
             // Utilisateur n'a pas encore liké, donc liké
-            salon.nbrStar += 1;
+            salon.totalStar += 1;
             salon.likedBy.push(userId);
+
+            await salon.save();
+
+            res.status(200).json({ message: "like réussie.", isLiked: true });
         }
-
-        await salon.save();
-
-        res.status(200).json({ message: "Opération de like/dislike réussie." });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
