@@ -141,6 +141,7 @@ export const getAllSalon = async (req, res) => {
                     address: 1,
                     email: 1,
                     phone: 1,
+                    whatsappNumber: 1,
                     distance: {
                         $add: [
                             { $pow: [{ $subtract: ['$lat', lat] }, 2] },

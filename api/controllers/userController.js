@@ -64,3 +64,17 @@ export const updateUserProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const  verifyUserNameExist = async (req, res) => {
+    try{
+        const { username} = req.body;
+        const existingUser = await UserModel.findOne({username});
+        if (existingUser) {
+            return res.status(200).json({ exist: true});
+        } else{
+            return res.status(200).json({ exist: false});
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
