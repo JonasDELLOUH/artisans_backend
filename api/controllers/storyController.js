@@ -75,6 +75,7 @@ export const getStories = async (req, res) => {
                 },
             },
             { $sort: { distance: 1 } },
+            { $sort: { createdAt: -1 } },
             { $skip: skipNumber },
             { $limit: limitNumber },
         ];
@@ -100,6 +101,15 @@ export const getStories = async (req, res) => {
                 _id: salon._id,
                 name: salon.name,
                 imageUrl: salon.imageUrl,
+                userId: salon.userId,
+                jobId: salon.jobId,
+                lat: salon.lat,
+                desc: salon.desc,
+                long: salon.long,
+                address: salon.address,
+                email: salon.email,
+                phone: salon.phone,
+                whatsappNumber: salon.whatsappNumber,
             };
         }
 
